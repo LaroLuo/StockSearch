@@ -6,7 +6,6 @@ router.get('/', function(req, res, next) {
     var func = req.query.func;
     var name = req.query.name;
     res.json({ message: 'hooray! welcome to our api!' });
-    req.end();
 });
 
 module.exports = router;

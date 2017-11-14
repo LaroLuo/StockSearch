@@ -1,0 +1,228 @@
+<!-- index.html -->
+<!doctype html>
+
+<!-- ASSIGN OUR ANGULAR MODULE -->
+<html ng-app="hw8">
+<head>
+    <!-- META -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Optimize mobile viewport -->
+
+    <title>Rui Luo's HW8</title>
+
+    <!-- SCROLLS -->
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-messages.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+
+
+
+
+    <style>
+        .container .jumbotron{
+            background-color: white;
+        }
+        html                    { overflow-y:scroll;}
+        body                    { padding-top:50px;
+                                background-image: url("http://cs-server.usc.edu:45678/hw/hw8/images/background.png");
+                                }
+        .red{
+            border: solid 3px red;
+        }
+        .ta_title{
+            background-color: dimgrey;
+        }
+        .out_table{
+            border:1px solid
+        }
+    </style>
+
+    <!-- SPELLS -->
+    <script src="core.js"></script>
+    <script src="inputCtrl.js"></script>
+    <script src="refreshCtrl.js"></script>
+
+</head>
+<body>
+<!--class="col-md-6"-->
+
+<div class="container">
+    <div class="jumbotron" ng-controller="InputCtrl as ctrl" layout="column" ng-cloak="">
+        <div style="text-align:center">Stock Market Search</div>
+        <form ng-submit="" name="autocompleteForm" >
+            <div class="row">
+
+            <div class="col-md-3">
+                Enter Stock Ticker Symbol:<span style="color:red">*</span>
+            </div>
+            <div class="col-md-6">
+            <md-autocomplete
+             ng-class="{red: autocompleteForm.autocomplete.$invalid}"
+             required
+             ng-minlength="10"
+             md-input-name="autocomplete"
+             md-selected-item="ctrl.selectedItem"
+             md-search-text-change="ctrl.searchTextChange(ctrl.searchText)"
+             md-search-text="ctrl.searchText"
+             md-selected-item-change="ctrl.selectedItemChange(ctrl.searchText)"
+             md-items="item in ctrl.querySearch(ctrl.searchText)"
+             md-item-text="item.display"
+             placeholder="e.g. AAPL">
+                <md-item-template>
+                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                </md-item-template>
+            </md-autocomplete>
+            </div>
+            <div class="col-md-3">
+                <button ng-click="ctrl.click()" type="button" value="Get Quote" class="btn btn-primary" ng-disabled="autocompleteForm.autocomplete.$invalid" aria-label="Left Align">
+                    <span class="fa fa-search" aria-hidden="true"></span>Get Quote
+                </button>
+                <input type="reset" value="Clear " class="btn btn-default" ng-model="clear">
+            </div>
+            </div>
+            <div ng-messages="autocompleteForm.autocomplete.$error" class="row">
+                <div ng-message="required" class = "offset-md-3">Please enter a stock ticker symbol</div>
+            </div>
+        </form>
+    </div>
+</div>
+<!--<div class="row justify-content-between">-->
+    <!--<div>Favorite List</div>-->
+    <!--<div>-->
+        <!--<label>-->
+            <!--Automatic Refresh:-->
+            <!--<input type="checkbox" data-toggle="toggle" data-size="normal">-->
+        <!--</label>-->
+        <!--<button type="button" class="btn btn-default" aria-label="Left Align">-->
+            <!--<span class="fa fa-refresh" aria-hidden="true"></span>-->
+        <!--</button>-->
+        <!--<button type="button" class="btn btn-default" aria-label="Left Align">-->
+            <!--<span class="fa fa-chevron-right" aria-hidden="true"></span>-->
+        <!--</button>-->
+    <!--</div>-->
+<!--</div>-->
+
+<div  class = "container">
+    <hr>
+</div>
+
+<div class = "container" ng-controller = "RefreshCtrl">
+    <div class="jumbotron">
+        <table  class="table out_table">
+            <tr>
+                <div>
+                    <div class="float-left">Favorite List</div>
+                    <div class="float-right">
+                        <label>
+                            Automatic Refresh:
+                            <input type="checkbox" data-toggle="toggle" data-size="normal">
+                        </label>
+                        <button type="button" class="btn btn-default" aria-label="Left Align">
+                            <span class="fa fa-refresh" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="btn btn-default" aria-label="Left Align">
+                            <span class="fa fa-chevron-right" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </tr>
+            <tr>
+                <table class="table table-striped table-hover">
+                    <tr>
+                        Sort by
+                    </tr>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Stock Price</th>
+                        <th>Change (Change Percent)</th>
+                        <th>Volume</th>
+                        <th> </th>
+                    </tr>
+                    <tr ng-repeat="x in favoList">
+                    <td>{{ x.symbol }}</td>
+                    <td>{{ x.price }}</td>
+                    <td ng-bind-html="x.text"></td>
+                    <td>{{ x.volume }}</td>
+                    <td ng-bind-html="x.button"></td>
+                    </tr>
+                </table>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="container">
+    <div class="jumbotron">
+        <table class="table">
+            <tr>
+                <button type="button" class="btn btn-default float-left" aria-label="Left Align">
+                    <span class="fa fa-chevron-left" aria-hidden="true"></span>
+                </button>
+                <div style="text-align: center">
+                    Stock Details
+                </div>
+            </tr>
+            <tr>
+                <td>
+                <nav class="navbar navbar-expand-lg bg-light">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fa fa-tachometer" aria-hidden="true"></i></span>Current Stock</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fa fa-bar-chart" aria-hidden="true"></i>Historical Charts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fa fa-paperclip" aria-hidden="true"></i>News Feeds</a>
+                        </li>
+                    </ul>
+                </div>
+                </nav>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%" >
+                    <table class="table table-striped table-hover">
+                        <tr>
+                        </tr>
+                    </table>
+                </td>
+                <td width="50%">
+
+                </td>
+            </tr>
+            <table>
+
+
+            </table>
+        </table>
+
+    </div>
+
+
+</div>
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+</body>
+
+</html>
