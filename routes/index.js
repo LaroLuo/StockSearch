@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var request = require('request');
 /* GET home page. */
 
 
@@ -8,7 +7,7 @@ var request = require('request');
 var handler = require('./requestHandlers');
 function render(res, file)
 {
-    res.json(file);
+    res.send(file);
 }
 
 
@@ -23,6 +22,13 @@ router.get('/', function(req, res, hand){
     hand["news"] = handler.news;
     hand["indicators"] = handler.indicators;
     hand["autocomplete"] = handler.autocomplete;
+    hand["highchart"] = handler.highchart;
+    hand["iosNews"] = handler.iosNews;
+    hand["iosDetail"] = handler.iosDetail;
+    hand["iosRefresh"] = handler.iosRefresh;
+
+
+
     var fun = req.query.func;
     console.log(fun);
     if(typeof hand[fun] === 'function'){

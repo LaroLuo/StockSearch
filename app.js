@@ -1,12 +1,13 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var router = require('./routes/index');
+// var cors = require('cors');
 
 var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,17 +23,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 // this is where api function.
-
-
-
-
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+// app.use(cors());
 app.use('/api', router);
+
 
 app.get('/', function(req, res, next) {
     res.sendfile('./public/index.html')
     }
 );
-
+app.get('/test', function(req, res, next) {
+        res.sendfile('./public/test.html')
+    }
+);
 
 
 

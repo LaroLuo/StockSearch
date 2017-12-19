@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+</head>
+
+<body>
+
+<div id ="his_charts"></div>
+
+
+
+</body>
+<script>
+    function render_history(name)
+    {
+        console.log("render",name)
+        var api_url = "http://hw8-envv.us-west-1.elasticbeanstalk.com/api?func=refresh&name=" + name
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET",api_url,false)
+        xhr.send();
+        var json = JSON.parse(xhr.responseText)
+        console.log(json)
+        var data = [];
+        try{
+            var jsonobj = JSON.parse(json[0]);
+        }
+        catch (e){
+        }
+        var title =  name + " Stock Value";
+        console.log(jsonobj)
+        for (var date_j in jsonobj["Time Series (Daily)"])
+        {
+            var tmp = [];
+            tmp.push(parseInt(Date.parse(date_j)));
+            tmp.push(parseFloat(parseFloat(jsonobj["Time Series (Daily)"][date_j]["4. close"]).toFixed(2)));
+            data.unshift(tmp);
+        }
+        var chart = Highcharts.stockChart('his_charts', {
+
+            title: {
+                text: title
+            },
+
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>'
+            },
+
+            rangeSelector: {
+                buttons: [
+
+                    {
+                        type: 'month',
+                        count: 1,
+                        text: '1m'
+                    }, {
+                        type: 'month',
+                        count: 2,
+                        text: '3m'
+                    }, {
+                        type: 'month',
+                        count: 3,
+                        text: '6m'
+                    }, {
+                        type: 'year',
+                        count: 4,
+                        text: '1y'
+                    }, {
+                        type: 'all',
+                        count:5,
+                        text: 'All'
+                    }]
+            },
+            tooltip: {
+                split:false
+            },
+            series: [{
+                name: 'AAPL Stock Price',
+                data: data,
+                type: 'area',
+                threshold: null,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            }],
+
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500,
+                        maxHeight : 700,
+                    },
+                    chartOptions: {
+                        chart: {
+                            height: 300
+                        },
+                        subtitle: {
+                            text: null
+                        },
+                        navigator: {
+                            enabled: false
+                        }
+                    }
+                }]
+            }
+        });
+
+    }
+
+
+
+
+
+    function renderPrice(json_obj){
+        var price_arr =[];
+        var volume_arr = [];
+        var date_arr = [];
+        var i = 0;
+        for (var date_j in json_obj["Time Series (Daily)"])
+        {
+            if (i > 200) break
+            date_arr.unshift(return_date(date_j))
+            price_arr.unshift(parseFloat(json_obj["Time Series (Daily)"][date_j]["4. close"]));
+            volume_arr.unshift(parseFloat(json_obj["Time Series (Daily)"][date_j]["5. volume"]));
+            i++;
+        }
+        var char_title = "Stock Price (" + json_obj["Meta Data"]["3. Last Refreshed"]+ ")";
+        var chart1 = Highcharts.chart('chart', {
+            chart: {
+                zoomType: 'x'
+            },
+            title: {
+                text: char_title
+            },
+            subtitle: {
+                text:  '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>'
+            },
+            xAxis: [{
+                categories:date_arr,
+                tickInterval:5
+            }],
+            yAxis: [{ // Primary yAxis
+                title: {
+                    text: 'Stock Price',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }, { // Secondary yAxis
+                title: {
+                    text: 'Volume',
+                    style: {
+                        color: Highcharts.getOptions().colors[0]
+                    }
+                },
+                opposite: true
+            }],
+            tooltip: {
+                shared: true
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: 'Stock Price',
+                type: 'area',
+
+                data: price_arr
+            }, {
+                name: 'Volume',
+                type: 'column',
+                yAxis: 1,
+                data: volume_arr
+            }]
+        });
+    }
+    function renderInds(jsonobj,spec,name){
+        var char_title = jsonobj["Meta Data"]["2: Indicator"]
+        var data_arr = [];
+        var date_arr = [];
+        var stock_symbol = name;
+        var num = 0;
+        var indicator_func =spec;
+        for (var ele in jsonobj)
+        {
+            if (ele === "Meta Data")  continue;
+            for (var item in jsonobj[ele])
+            {
+                for (var ind in jsonobj[ele][item])
+                {
+                    var dic = { "name" : stock_symbol + " " +ind, "data" : new Array()}
+                    data_arr.push(dic);
+                }
+                break;
+            }
+        }
+        for (var ele in jsonobj) {
+            if (ele == "Meta Data") continue;
+            for (var item in jsonobj[ele]) {
+                if (num++ >= 200) break;
+                var j = 0;
+                date_arr.unshift(return_date(item))
+                for (var ind in jsonobj[ele][item]) {
+                    data_arr[j]["data"].unshift(parseFloat(jsonobj[ele][item][ind]));
+                    j++;
+                }
+            }
+        }
+        Highcharts.chart('chart', {
+            chart: {
+                zoomType: 'x'
+            },
+            title: {
+                text: char_title
+            },
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>'
+            },
+            xAxis: [{
+                categories:date_arr,
+                tickInterval:5
+            }],
+            yAxis: [{ // Primary yAxis
+                title: {
+                    text: indicator_func,
+                    style: {
+                        color: Highcharts.getOptions().colors[0]
+                    }
+                }
+            }],
+            plotOptions: {
+                series: {
+                    marker: {
+                        radius:2,
+                        enabled: true
+                    }
+                },
+                spline: {
+                    marker: {
+                        radius:1,
+                        enabled: true
+                    }
+                }
+            },
+            series: data_arr
+        });
+    }
+
+</script>
+</html>
+
+

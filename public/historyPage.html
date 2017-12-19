@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="hw8" ng-controller="history_chart as his">
+
+
+<head>
+    <meta charset="UTF-8">
+
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-messages.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.min.js"></script>
+    <script src="//code.angularjs.org/1.2.20/angular-sanitize.min.js"></script>
+    <!-- Angular Material Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+</head>
+<body>
+<div id = "his_charts">{{his.good}}</div>
+
+
+</body>
+
+
+
+
+
+
+
+<script type="javascript">
+
+    'use strict';
+
+    angular.module('hw8',["ng","ngAnimate","ngAria", 'ngMessages']);
+    angular.module('hw8').controller('history_chart',history_chart($log, $http){
+        this.print = print;
+        this.getJSON = getJSON;
+
+        this.good = "sa";
+
+        function print(){
+            this.good = "ssss"
+        }
+
+
+        function getJSONData(name){
+            let apiurl = "http://hw8-envv.us-west-1.elasticbeanstalk.com/api"
+            var req = {
+                method : "GET",
+                url : apiurl,
+                headers : {
+                    'Content-Type': undefined
+                },
+                params:{
+                    "func":"indicators",
+                    "name": name
+                }
+            };
+            return $http(req).then(function (body) {
+                renderHisChart()
+            });
+        }
+
+
+
+
+
+        function renderHisChart()
+        {
+            $log.info("render his chart");
+            var data = [];
+            try{
+                var jsonobj = JSON.parse(self.ind_json["data"]["Price"]);
+            }
+            catch (e){
+                return;
+            }
+            var title =  $rootScope.stock_symbol + " Stock Value";
+            for (var date_j in jsonobj["Time Series (Daily)"])
+            {
+                var tmp = [];
+                tmp.push(parseInt(Date.parse(date_j)));
+                tmp.push(parseFloat(parseFloat(jsonobj["Time Series (Daily)"][date_j]["4. close"]).toFixed(2)));
+                data.unshift(tmp);
+            }
+            var chart = Highcharts.stockChart('his_charts', {
+
+                title: {
+                    text: title
+                },
+
+                subtitle: {
+                    text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>'
+                },
+
+                rangeSelector: {
+                    buttons: [
+                        {type: 'week',
+                            count: 1,
+                            text: '1W'},
+                        {
+                            type: 'month',
+                            count: 2,
+                            text: '1m'
+                        }, {
+                            type: 'month',
+                            count: 3,
+                            text: '3m'
+                        }, {
+                            type: 'month',
+                            count: 4,
+                            text: '6m'
+                        }, {
+                            type: 'ytd',
+                            count:5,
+                            text: 'YTD'
+                        }, {
+                            type: 'year',
+                            count: 6,
+                            text: '1y'
+                        }, {
+                            type: 'all',
+                            count:7,
+                            text: 'All'
+                        }]
+                },
+                tooltip: {
+                    split:false
+                },
+                series: [{
+                    name: 'AAPL Stock Price',
+                    data: data,
+                    type: 'area',
+                    threshold: null,
+                    tooltip: {
+                        valueDecimals: 2
+                    }
+                }],
+
+                responsive: {
+                    rules: [{
+                        condition: {
+                            maxWidth: 500
+                        },
+                        chartOptions: {
+                            chart: {
+                                height: 300
+                            },
+                            subtitle: {
+                                text: null
+                            },
+                            navigator: {
+                                enabled: false
+                            }
+                        }
+                    }]
+                }
+            });
+
+        }
+    };
+
+
+
+
+
+
+</script>
+
+</html>

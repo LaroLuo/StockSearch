@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+</head>
+
+<body>
+
+<div id ="his_charts"></div>
+
+
+
+</body>
+<script>
+    render_indicator("AAPL")
+
+    function render_indicator(name)
+    {
+        console.log("render",name)
+        var api_url = "http://hw8-envv.us-west-1.elasticbeanstalk.com/api?func=refresh&name=" + name
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET",api_url,false)
+        xhr.send();
+        var json = JSON.parse(xhr.responseText)
+        console.log(json)
+        var data = [];
+        try{
+            var jsonobj = JSON.parse(json[0]);
+        }
+        catch (e){
+        }
+        var title =  name + " Stock Value";
+        console.log(jsonobj)
+        for (var date_j in jsonobj["Time Series (Daily)"])
+        {
+            var tmp = [];
+            tmp.push(parseInt(Date.parse(date_j)));
+            tmp.push(parseFloat(parseFloat(jsonobj["Time Series (Daily)"][date_j]["4. close"]).toFixed(2)));
+            data.unshift(tmp);
+        }
+        var chart = Highcharts.stockChart('his_charts', {
+
+            title: {
+                text: title
+            },
+
+            subtitle: {
+                text: '<a href="https://www.alphavantage.co/" target="_blank">Source: Alpha Vantage</a>'
+            },
+
+            rangeSelector: {
+                buttons: [
+
+                    {
+                        type: 'month',
+                        count: 1,
+                        text: '1m'
+                    }, {
+                        type: 'month',
+                        count: 2,
+                        text: '3m'
+                    }, {
+                        type: 'month',
+                        count: 3,
+                        text: '6m'
+                    }, {
+                        type: 'year',
+                        count: 4,
+                        text: '1y'
+                    }, {
+                        type: 'all',
+                        count:5,
+                        text: 'All'
+                    }]
+            },
+            tooltip: {
+                split:false
+            },
+            series: [{
+                name: 'AAPL Stock Price',
+                data: data,
+                type: 'area',
+                threshold: null,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            }],
+
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500,
+                        maxHeight : 700,
+                    },
+                    chartOptions: {
+                        chart: {
+                            height: 300
+                        },
+                        subtitle: {
+                            text: null
+                        },
+                        navigator: {
+                            enabled: false
+                        }
+                    }
+                }]
+            }
+        });
+
+    }
+
+</script>
+</html>
+
+
